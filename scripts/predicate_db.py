@@ -62,35 +62,38 @@ class PredicateDB():
     return tuple(args) in self.predicates[str(name)] or tuple(args) in self.npredicates[str(name)]
 
   def infer_domains(self, relations):
-    pass
+    """
+    Infer the domains given a set of relations.
 
-  def to_csv(self, sep=','):
-    """Prints the predicates to a set of csv files. For now ignores negative examples."""
+    Parameters
+    ----------
+    relations : dict
+        Dictionary from a predicate name to the tuple of arguments)
+
+    Returns
+    -------
+    dict
+        A dictionary from the relations' names to the set of values.
+
+    """
+    domains = dict()
+    for name, args in relations.items():
+      for arg in args:
+        if arg not in domains:
+          domains[arg] = set()
+
     for name, args in self.ppredicates.items():
-      f = open(name + '.csv', 'w')
-      for arg in args:
-        f.write(sep.join([str(a) in arg]) + '\n')
-      f.close()
+      if name not in relations:
+        continue
 
-  def to_aleph_files(self, filename):
-    """Outputs the predicates to a .f file for positive predicates and a .n file for negative predicates."""
-    f = open(filename + '.f', 'w')
-    for name, args in self.ppredicates.items():
       for arg in args:
-        f.write(name + '(' + ', '.join(arg) + ').\n')
-    f.close()
+        for i in range(len(arg)):
+          d = relations[name][i]
+          domains[d].add(arg[i])
 
-    n = open(filename + '.n', 'w')
-    for name, args in self.npredicates.items():
-      for arg in args:
-        n.write(name + '(' + ', '.join(arg) + ').\n')
-    n.close()
+    # Do same thing for negative predicates.
 
-  def to_alchemy_file(self, filename):
-    """Outputs the predicates to a file in Alchemy's db format."""
-    f = open(filename + '.f', 'w')
-    f.write(self.__str__())
-    f.close()
+    return domains
 
   def from_csv(self, folder, sep=','):
     """Read all CSV files in a folder, treating them as tables for positive predicates."""
@@ -129,6 +132,34 @@ class PredicateDB():
         name = tokens[0]
         args = tuple(tokens[1:])
         add_predicate(self, name, args, False)
+
+  def to_csv(self, sep=','):
+    """Prints the predicates to a set of csv files. For now ignores negative examples."""
+    for name, args in self.ppredicates.items():
+      f = open(name + '.csv', 'w')
+      for arg in args:
+        f.write(sep.join([str(a) in arg]) + '\n')
+      f.close()
+
+  def to_aleph_files(self, filename):
+    """Outputs the predicates to a .f file for positive predicates and a .n file for negative predicates."""
+    f = open(filename + '.f', 'w')
+    for name, args in self.ppredicates.items():
+      for arg in args:
+        f.write(name + '(' + ', '.join(arg) + ').\n')
+    f.close()
+
+    n = open(filename + '.n', 'w')
+    for name, args in self.npredicates.items():
+      for arg in args:
+        n.write(name + '(' + ', '.join(arg) + ').\n')
+    n.close()
+
+  def to_alchemy_file(self, filename):
+    """Outputs the predicates to a file in Alchemy's db format."""
+    f = open(filename + '.f', 'w')
+    f.write(self.__str__())
+    f.close()
 
   def __str__(self):
     s = ''
