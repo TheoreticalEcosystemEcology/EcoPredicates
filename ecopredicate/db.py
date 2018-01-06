@@ -1,6 +1,6 @@
 import glob, os
 
-class PredicateDB():
+class DB():
   """ A database as dictionaries of positive and negative predicates. This
   class is used to load predicates from various file formats, get info on them,
   and write to popular formats.
