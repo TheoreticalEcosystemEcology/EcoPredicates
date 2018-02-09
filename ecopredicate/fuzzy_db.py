@@ -19,6 +19,10 @@ class FuzzyDB():
         self.predicates[name] = dict()
       self.predicates[name][args] = truth
 
+  def truth(self, p, xs):
+    """Returns the truth value for predicate p and arguments xs. Returns 0.0 if not found."""
+    return self.predicates[xs] if p in self.predicates and xs in self.predicates[p] else 0.0
+
   def predicate_names(self):
     """Names of the predicates in the database."""
     return set(predicates.keys())
@@ -38,3 +42,10 @@ class FuzzyDB():
   def __contains__(self, name, args):
     """Checks if a predicate is present in the positive or negative set of predicates."""
     return name in self.predicates and tuple(args) in self.predicates[name]
+
+  def __str__(self):
+    s = ''
+    for name, args in self.predicates.items():
+      for arg, truth in args.items():
+        s += name + '(' + ', '.join(arg) + ') / ' + str(truth) + '\n'
+    return s
